@@ -2,7 +2,7 @@
   <div class="blog-container">
     <h1>我的日记博客</h1>
 
-    <!-- 输入区域123 -->
+    <!-- 输入区域123分支测试 -->
     <el-card class="input-card">
       <el-input
         v-model="title"
