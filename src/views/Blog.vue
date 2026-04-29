@@ -1,6 +1,6 @@
 <template>
   <div class="blog-container">
-    <h1>我的博客</h1>
+    <h1>我的日记博客</h1>
 
     <!-- 输入区域 -->
     <el-card class="input-card">
