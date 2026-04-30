@@ -34,6 +34,17 @@
       </el-form>
     </div>
   </div>
+  <!-- <div class="beian-box">
+    <a href="https://beian.mps.gov.cn/#/query/webSearch?code=36073102000210" rel="noreferrer" target="_blank">
+      <img src="/public/备案图标.png" alt="公安备案">赣公网安备36073102000210号
+    </a>
+    <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+        赣ICP备2026008359号
+      </a>
+  </div> -->
+  <!-- <a href="https://beian.mps.gov.cn/" target="_blank">
+  <img src="备案图标地址" alt="公安备案"> 粤公网安备 XXXXXXXXX号
+  </a> -->
 </template>
 
 <script setup>
@@ -129,4 +140,5 @@ const handleRegister = async () => {
 .tab-box span.active { color: #409eff; font-weight: bold; border-bottom: 2px solid #409eff; }
 .form { display: flex; flex-direction: column; gap: 20px; }
 .submit-btn { height: 44px; font-size: 16px; }
+
 </style>
