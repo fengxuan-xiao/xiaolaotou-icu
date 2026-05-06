@@ -1,9 +1,11 @@
 import request from '@/utils/request'
 
-export function getArticles() {
+// 1. 添加 params 参数，并设置默认值为空对象 {}
+export function getArticles(params = {}) {
   return request({
-    url: '/api/articles',
-    method: 'get'
+    url: '/api/articlesPage',
+    method: 'get',
+    params // 自动将对象序列化为 URL 查询参数 ?page=1&pageSize=10
   })
 }
 

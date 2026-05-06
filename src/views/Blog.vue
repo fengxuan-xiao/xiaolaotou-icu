@@ -40,6 +40,21 @@
           </el-button>
         </div>
       </div>
+
+      <!-- 分页组件 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="blogStore.currentPage"
+          v-model:page-size="blogStore.pageSize"
+          :page-sizes="[5, 10, 20, 50]"
+          :total="blogStore.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+
+
     </el-card>
   </div>
 </template>
@@ -70,11 +85,26 @@ const handleDelete = (id) => {
   blogStore.deleteArticle(id)
 }
 
+// 分页事件处理
+const handleSizeChange = (val) => {
+  // 每页条数变化，重置到第一页
+  blogStore.fetchArticles(1, val)
+}
+
+const handleCurrentChange = (val) => {
+  // 页码变化
+  blogStore.fetchArticles(val, blogStore.pageSize)
+}
+
 // 组件挂载时加载后端数据
 onMounted(() => {
-  blogStore.fetchArticles()
+  //blogStore.fetchArticles()
+  // 初始加载第一页
+  blogStore.fetchArticles(1, 10)
   console.log('onMounted 执行了')
 })
+
+
 
 </script>
 
