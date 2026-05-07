@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', () => {
     loading.value = true
     try {
       const res = await apiLogin(loginForm)
+      debugger;
       // 假设 res.data 是 token
       const newToken = res.data
       

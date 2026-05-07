@@ -40,14 +40,17 @@ export const useBlogStore = defineStore('blog', () => {
 
   // 添加文章
   async function addArticle(title, content) {
+    debugger;
     if (!title.trim() || !content.trim()) {
       ElMessage.warning('标题和内容不能为空')
       return false
     }
     
     loading.value = true
+    console.log('Before API call');
     try {
       const res = await apiAddArticle({ title: title.trim(), content: content.trim() })
+      console.log('API Response:', res);
       // 假设返回的是新创建的文章对象
       //articles.value.push(res.data)
       // 添加成功后，通常建议刷新第一页或者重新获取当前页
@@ -56,6 +59,7 @@ export const useBlogStore = defineStore('blog', () => {
       ElMessage.success('添加成功')
       return true
     } catch (error) {
+      console.error('API Error:', error);
       return false
     } finally {
       loading.value = false

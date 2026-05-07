@@ -20,9 +20,38 @@ service.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
     const token = localStorage.getItem('token')
+    debugger;
     if (token) {
       // 假设后端要求 Header 中携带 Authorization: Bearer <token>
-      config.headers['Authorization'] = `Bearer ${token}`
+      //config.headers['Authorization'] = `Bearer ${token}`
+
+      // 【修复点 1】处理 [object Object] 的情况
+      if (token === '[object Object]') {
+        console.error('Token is [object Object]. Clearing storage...')
+        localStorage.removeItem('token')
+        // 可选：强制跳转登录页
+        // window.location.href = '/login'
+        return Promise.reject(new Error('Token format error, please re-login'))
+      }
+
+      // 【修复点 2】处理 JSON 字符串的情况 (例如存的是 '{"token":"..."}')
+      try {
+        if (typeof token === 'string' && token.trim().startsWith('{')) {
+          const tokenObj = JSON.parse(token)
+          // 尝试从常见字段获取 token
+          token = tokenObj.token || tokenObj.access_token || tokenObj.data?.token || ''
+        }
+      } catch (e) {
+        // 如果解析失败，说明它可能本来就是纯字符串，保持原样
+      }
+
+      // 【修复点 3】确保最终使用的是字符串
+      if (token && typeof token === 'string') {
+        config.headers['Authorization'] = `Bearer ${token.trim()}`
+      } else {
+        console.warn('No valid token string found.')
+      }
+
     }
     return config
   },
@@ -48,9 +77,12 @@ service.interceptors.response.use(
     console.error('Response Error:', error)
     let message = '网络异常'
     if (error.response) {
+      debugger;
       switch (error.response.status) {
         case 401:
           message = '未授权，请重新登录'
+          console.warn('401 Error Details:', error.response.data) // <--- 打印后端返回的详细错误
+
           // 可以在这里触发登出逻辑，清除 token
           localStorage.removeItem('token')
           window.location.href = '/login'
