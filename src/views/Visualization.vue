@@ -121,7 +121,7 @@ let scrollTimer3 = null // 用于控制图3滚动的定时器
 
 // 返回首页
 const goHome = () => {
-  router.push('/')
+  router.push('/blog')
 }
 
 // 模拟后端数据获取
