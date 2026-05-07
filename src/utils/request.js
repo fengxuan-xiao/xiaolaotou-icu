@@ -19,7 +19,7 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
-    const token = localStorage.getItem('token')
+    let token = localStorage.getItem('token')
     debugger;
     if (token) {
       // 假设后端要求 Header 中携带 Authorization: Bearer <token>

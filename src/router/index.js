@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import Blog from '../views/Blog.vue'
+import Visualization from '@/views/Visualization.vue'
+import Report from '@/views/Report.vue'
 //导入 useUserStore
 import { useUserStore } from '@/stores/user' 
 
@@ -19,6 +21,18 @@ const routes = [
     name: 'Blog',
     component: () => import('@/views/Blog.vue'), // 假设你的博客列表页叫 Blog.vue
     meta: { requiresAuth: true } // 需要登录才能访问
+  },
+  {
+    path: '/visualization',
+    name: 'Visualization',
+    component: Visualization,
+    meta: { title: '数据可视化' }
+  },
+  {
+    path: '/report',
+    name: 'Report',
+    component: Report,
+    meta: { title: '统计报表' }
   }
 ]
 
