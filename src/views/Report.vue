@@ -4,43 +4,57 @@
       <template #header>
         <div class="card-header">
           <span>统计报表</span>
-          <el-button type="primary" size="small" @click="exportReport">导出报表</el-button>
+          <div>
+            <!-- 假设 reportCode 是你已经在后端设计好的报表编码 -->
+            <el-button type="primary" size="small" @click="openDesigner">设计报表</el-button>
+            <el-button type="success" size="small" @click="refreshReport">刷新数据</el-button>
+          </div>
         </div>
       </template>
       
-      <el-table :data="tableData" style="width: 100%" border stripe>
-        <el-table-column prop="date" label="日期" width="180" />
-        <el-table-column prop="name" label="姓名" width="180" />
-        <el-table-column prop="address" label="地址" />
-        <el-table-column prop="amount" label="数值" sortable />
-      </el-table>
-      
-      <div class="pagination-area">
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="100"
-        />
+      <!-- 使用 iframe 嵌入 JimuReport 预览页面 -->
+      <div class="report-iframe-wrapper">
+        <iframe 
+          :src="reportUrl" 
+          frameborder="0" 
+          width="100%" 
+          height="600px"
+          ref="reportFrame"
+        ></iframe>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, onMounted } from 'vue'
 
-const tableData = ref([
-  { date: '2023-10-01', name: '张三', address: '上海市普陀区金沙江路 1518 弄', amount: 1200 },
-  { date: '2023-10-02', name: '李四', address: '北京市朝阳区工体北路', amount: 850 },
-  { date: '2023-10-03', name: '王五', address: '深圳市南山区深南大道', amount: 2300 },
-  { date: '2023-10-04', name: '赵六', address: '杭州市西湖区灵隐路', amount: 1500 },
-])
+// 后端 JimuReport 服务的基地址
+const backendBaseUrl = 'http://localhost:8080'
 
-const exportReport = () => {
-  ElMessage.success('报表导出功能开发中...')
-  // 这里可以添加实际的导出逻辑，例如调用后端接口生成 Excel
+// 报表编码，需在后端设计器中创建后获得
+const reportCode = ref('test_report_001') 
+
+// 计算 iframe 的 src
+const reportUrl = ref(`${backendBaseUrl}/jmreport/preview/${reportCode.value}`)
+
+// 打开设计器（通常会新窗口打开，因为设计器需要全屏操作）
+const openDesigner = () => {
+  window.open(`${backendBaseUrl}/jmreport/designer`, '_blank')
 }
+
+// 刷新报表（重新加载 iframe）
+const refreshReport = () => {
+  const frame = document.querySelector('iframe')
+  if (frame) {
+    frame.contentWindow.location.reload()
+  }
+}
+
+onMounted(() => {
+  // 可以在这里检查后端服务是否可达
+  console.log('Report URL:', reportUrl.value)
+})
 </script>
 
 <style scoped>
@@ -52,9 +66,9 @@ const exportReport = () => {
   justify-content: space-between;
   align-items: center;
 }
-.pagination-area {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
+.report-iframe-wrapper {
+  width: 100%;
+  min-height: 600px;
+  border: 1px solid #ebeef5;
 }
 </style>

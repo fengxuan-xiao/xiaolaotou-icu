@@ -3,6 +3,8 @@ import Login from '../views/Login.vue'
 import Blog from '../views/Blog.vue'
 import Visualization from '@/views/Visualization.vue'
 import Report from '@/views/Report.vue'
+import Rabbitmq from '@/views/Rabbitmq.vue'
+import Elasticsearch from '@/views/Elasticsearch.vue'
 //导入 useUserStore
 import { useUserStore } from '@/stores/user' 
 
@@ -33,6 +35,18 @@ const routes = [
     name: 'Report',
     component: Report,
     meta: { title: '统计报表' }
+  },
+  {
+    path: '/rabbitmq',
+    name: 'Rabbitmq',
+    component: Rabbitmq,
+    meta: { title: '消息队列' }
+  },
+  {
+    path: '/elasticsearch',
+    name: 'Elasticsearch',
+    component: Elasticsearch,
+    meta: { title: '模糊查询' }
   }
 ]
 

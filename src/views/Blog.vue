@@ -33,6 +33,14 @@
           <el-icon><Document /></el-icon>
           <span>报表模块</span>
         </el-menu-item>
+        <el-menu-item index="/rabbitmq">
+          <el-icon><Document /></el-icon>
+          <span>消息队列模块</span>
+        </el-menu-item>
+        <el-menu-item index="/elasticsearch">
+          <el-icon><Document /></el-icon>
+          <span>ES模糊查询模块</span>
+        </el-menu-item>
       </el-menu>
     </el-drawer>
 
@@ -153,6 +161,8 @@ const getCurrentTitle = computed(() => {
   // 可以根据路由 meta 信息动态获取标题，或者简单映射
   if (route.path === '/report') return '统计报表'
   if (route.path === '/visualization') return '数据可视化'
+  if (route.path === '/rabbitmq') return '消息队列'
+  if (route.path === '/elasticsearch') return '模糊查询'
   return '我的日记博客'
 })
 
@@ -160,6 +170,8 @@ const getCurrentTitle = computed(() => {
 const activeMenuIndex = computed(() => {
   if (route.path === '/report') return '/report'
   if (route.path === '/visualization') return '/visualization'
+  if (route.path === '/rabbitmq') return '/rabbitmq'
+  if (route.path === '/elasticsearch') return '/elasticsearch'
   return '/home' // 默认首页
 })
 
