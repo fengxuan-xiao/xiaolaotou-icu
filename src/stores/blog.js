@@ -39,7 +39,7 @@ export const useBlogStore = defineStore('blog', () => {
   }
 
   // 添加文章
-  async function addArticle(title, content) {
+  async function addArticle(title, content, files = []) {
     debugger;
     if (!title.trim() || !content.trim()) {
       ElMessage.warning('标题和内容不能为空')
@@ -49,7 +49,49 @@ export const useBlogStore = defineStore('blog', () => {
     loading.value = true
     console.log('Before API call');
     try {
-      const res = await apiAddArticle({ title: title.trim(), content: content.trim() })
+
+      // 构建 FormData
+      const formData = new FormData()
+
+      // 1. 构造 ArticleDTO 对象
+      const articleDTO = {
+        title: title.trim(),
+        content: content.trim()
+        // 如果 ArticleDTO 还有其他字段，请在这里补充
+      };
+      
+      // 1. 添加文章基本信息
+      // 注意：这里假设后端可以直接通过表单字段映射到 ArticleDTO 的属性
+      // 如果后端要求必须是一个名为 "articleDTO" 的 JSON 字符串部分，请使用下面注释掉的代码
+      // formData.append('title', title.trim())
+      // formData.append('content', content.trim())
+
+      // 2. 【关键修改】将 DTO 序列化为 JSON Blob，并作为 'articleDTO' 部分添加
+      // 后端报错说缺少 'articleDTO' part，所以 key 必须是 'articleDTO'
+      formData.append('articleDTO', new Blob([JSON.stringify(articleDTO)], {
+        type: 'application/json'
+      }));
+      
+      /* 
+       * 备选方案：如果后端控制器是这样写的：
+       * public Result add(@RequestPart("articleDTO") String articleDtoJson, @RequestPart("files") MultipartFile[] files)
+       * 则使用：
+       * formData.append('articleDTO', JSON.stringify({ title: title.trim(), content: content.trim() }))
+       */
+
+      // 2. 添加文件列表
+      // 后端参数名是 files，所以 append 的 key 必须是 'files'
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          formData.append('files', file)
+        })
+      }
+
+      console.log('Sending FormData:', formData);
+
+
+
+      const res = await apiAddArticle(formData );
       console.log('API Response:', res);
       // 假设返回的是新创建的文章对象
       //articles.value.push(res.data)

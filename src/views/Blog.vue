@@ -41,6 +41,10 @@
           <el-icon><Document /></el-icon>
           <span>ES模糊查询模块</span>
         </el-menu-item>
+        <el-menu-item index="/elasticsearch">
+          <el-icon><Document /></el-icon>
+          <span>Excle批量导入模块</span>
+        </el-menu-item>
       </el-menu>
     </el-drawer>
 
@@ -207,12 +211,22 @@ const removeAttachment = (index) => {
 
 // 添加文章
 const handleAdd = async () => {
+  // 将 attachments.value (File 对象数组) 传递给 store
+  const success = await blogStore.addArticle(title.value, content.value, attachments.value)
+  
+
   // debugger; // 生产环境请移除
-  const success = await blogStore.addArticle(title.value, content.value)
+  //const success = await blogStore.addArticle(title.value, content.value)
   if (success) {
     title.value = ''
     content.value = ''
+    attachments.value = [] // 清空附件列表
     //ElMessage.success('添加成功')
+
+    // 清空文件输入框的值，防止选择相同文件不触发 change 事件
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
   }
 }
 
