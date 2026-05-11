@@ -48,7 +48,7 @@
       </el-menu>
     </el-drawer>
 
-    <!-- 主内容区域：现在只保留博客功能，因为其他模块通过路由跳转 -->
+    <!-- 主内容区域 -->
     <div class="module-content">
       <el-card class="input-card">
         <el-input
@@ -103,16 +103,22 @@
         <div v-else class="article-list">
           <div v-for="article in blogStore.articles" :key="article.id" class="article-item">
             <div class="article-content">
-              <h3>{{ article.title }}</h3>
-              <p>{{ article.content }}</p>
-
-              <div v-if="article.attachments && article.attachments.length > 0" class="article-attachments">
-                <div class="attachment-label">附件：</div>
-                <div v-for="(att, idx) in article.attachments" :key="idx" class="file-item-display">
-                  📎 {{ att.name }}
-                </div>
+              <!-- 修改点：标题和附件指示器在同一行 -->
+              <div class="article-header">
+                <h3 class="article-title">{{ article.title }}</h3>
+                
+                <!-- 如果有附件，显示带下划线的图标/文字 -->
+                <span 
+                  v-if="article.attachments && article.attachments.length > 0" 
+                  class="attachment-indicator"
+                  @click="showAttachments(article)"
+                >
+                  <el-icon><Paperclip /></el-icon>
+                  {{ article.attachments.length }} 个附件
+                </span>
               </div>
 
+              <p>{{ article.content }}</p>
             </div>
             <el-button type="danger" size="small" @click="handleDelete(article.id)">
               删除
@@ -135,16 +141,45 @@
       </el-card>
     </div>
 
+    <!-- 附件查看对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      title="附件列表"
+      width="30%"
+    >
+      <div v-if="currentAttachments && currentAttachments.length > 0" class="dialog-attachment-list">
+        <div 
+          v-for="(att, index) in currentAttachments" 
+          :key="index" 
+          class="dialog-attachment-item"
+          @click="downloadAttachment(att)"
+        >
+          <el-icon><Document /></el-icon>
+          <span class="attachment-name">{{ att.fileName }}</span>
+          <el-icon class="download-icon"><Download /></el-icon>
+        </div>
+      </div>
+      <div v-else class="empty-attachment">
+        暂无附件
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router' // 引入路由钩子
+import { useRoute, useRouter } from 'vue-router'
 import { useBlogStore } from '@/stores/blog'
 // 引入所需图标
-import { Menu, HomeFilled, DataLine, Document, Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus' // 确保引入 ElMessage
+import { Menu, HomeFilled, DataLine, Document, Plus, Paperclip, Download } from '@element-plus/icons-vue'
+import { ElMessage, ElDialog } from 'element-plus'
+import axios from 'axios' // 用于下载文件
 
 // 使用 store
 const blogStore = useBlogStore()
@@ -160,9 +195,12 @@ const content = ref('')
 const attachments = ref([])
 const fileInputRef = ref(null)
 
+// 附件对话框状态
+const dialogVisible = ref(false)
+const currentAttachments = ref([])
+
 // 计算当前页面标题
 const getCurrentTitle = computed(() => {
-  // 可以根据路由 meta 信息动态获取标题，或者简单映射
   if (route.path === '/report') return '统计报表'
   if (route.path === '/visualization') return '数据可视化'
   if (route.path === '/rabbitmq') return '消息队列'
@@ -170,19 +208,18 @@ const getCurrentTitle = computed(() => {
   return '我的日记博客'
 })
 
-// 计算当前激活的菜单项，基于当前路由路径
+// 计算当前激活的菜单项
 const activeMenuIndex = computed(() => {
   if (route.path === '/report') return '/report'
   if (route.path === '/visualization') return '/visualization'
   if (route.path === '/rabbitmq') return '/rabbitmq'
   if (route.path === '/elasticsearch') return '/elasticsearch'
-  return '/home' // 默认首页
+  return '/home'
 })
 
-// 菜单选择处理：改为路由跳转
+// 菜单选择处理
 const handleMenuSelect = (index) => {
-  drawerVisible.value = false // 选择后关闭抽屉
-  
+  drawerVisible.value = false
   if (index === '/home') {
     router.push('/')
   } else {
@@ -211,19 +248,11 @@ const removeAttachment = (index) => {
 
 // 添加文章
 const handleAdd = async () => {
-  // 将 attachments.value (File 对象数组) 传递给 store
   const success = await blogStore.addArticle(title.value, content.value, attachments.value)
-  
-
-  // debugger; // 生产环境请移除
-  //const success = await blogStore.addArticle(title.value, content.value)
   if (success) {
     title.value = ''
     content.value = ''
-    attachments.value = [] // 清空附件列表
-    //ElMessage.success('添加成功')
-
-    // 清空文件输入框的值，防止选择相同文件不触发 change 事件
+    attachments.value = []
     if (fileInputRef.value) {
       fileInputRef.value.value = ''
     }
@@ -244,10 +273,84 @@ const handleCurrentChange = (val) => {
   blogStore.fetchArticles(val, blogStore.pageSize)
 }
 
+// 【新增】显示附件列表
+const showAttachments = (article) => {
+  debugger;
+  console.log('Current Article Attachments:', article.attachments);
+  currentAttachments.value = article.attachments || []
+  dialogVisible.value = true
+}
+
+// 【新增】下载附件 - 使用 Axios Blob 方式以支持跨域重命名
+const downloadAttachment = async (attachment) => {
+  if (!attachment.filePath) {
+    ElMessage.warning('附件路径不存在')
+    return
+  }
+
+  try {
+    // 1. 构造完整的文件 URL
+    let fileUrl = attachment.filePath
+    
+    // 获取后端基础地址 (去掉 /api 前缀，因为静态资源通常不在 /api 下)
+    const apiBase = import.meta.env.VITE_APP_BASE_API || ''
+    // 假设 VITE_APP_BASE_API 是 http://localhost:8080/api 或 /api
+    // 我们需要提取出 http://localhost:8080
+    let backendOrigin = ''
+    if (apiBase.startsWith('http')) {
+      backendOrigin = apiBase.replace(/\/api$/, '')
+    } else {
+      // 如果是相对路径 /api，则使用当前页面的 origin 替换端口为后端端口？
+      // 更稳妥的方式是直接硬编码后端地址，或者确保环境变量配置正确
+      // 这里假设后端就在 8080
+      backendOrigin = 'http://localhost:8080' 
+    }
+
+    if (!fileUrl.startsWith('http')) {
+      const cleanPath = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`
+      fileUrl = `${backendOrigin}/uploads${cleanPath}`
+    }
+    
+    console.log('Fetching file from:', fileUrl)
+
+    // 2. 使用 Axios 获取 Blob 数据
+    // 注意：如果后端静态资源允许匿名访问，不需要带 Token；如果需要鉴权，请保留 headers
+    const response = await axios.get(fileUrl, {
+      responseType: 'blob', // 关键：指定响应类型为 blob
+      // headers: {
+      //   'Authorization': `Bearer ${localStorage.getItem('token')}`
+      // }
+    })
+
+    // 3. 创建 Blob 对象
+    const blob = new Blob([response.data])
+    
+    // 4. 创建下载链接
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    
+    // 【关键】这里设置的文件名一定会生效，因为是本地 Blob URL
+    link.download = attachment.fileName
+    
+    // 5. 触发下载
+    document.body.appendChild(link)
+    link.click()
+    
+    // 6. 清理
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(link.href)
+    
+    ElMessage.success('开始下载')
+  } catch (error) {
+    console.error('Download failed:', error)
+    // 如果 Axios 失败（例如跨域被拦截），可以尝试回退到直接链接方式
+    // 但直接链接方式无法自定义文件名
+    ElMessage.error('下载失败，可能是跨域限制或网络错误')
+  }
+}
+
 // 组件挂载时加载后端数据
 onMounted(() => {
-
-  // 只有当当前路由是首页时才加载文章
   if (route.path === '/' || route.path === '/blog') {
      if (blogStore.articles.length === 0) {
       blogStore.fetchArticles(1, 10)
@@ -257,7 +360,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 样式保持不变，略 */
 .blog-container {
   max-width: 1000px; 
   margin: 0 auto;
@@ -346,10 +448,35 @@ onMounted(() => {
   margin-right: 15px;
 }
 
-.article-content h3 {
-  margin: 0 0 8px 0;
+/* 新增样式：文章头部容器 */
+.article-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.article-title {
+  margin: 0;
   font-size: 18px;
   color: #303133;
+  font-weight: bold;
+}
+
+/* 新增样式：附件指示器（带下划线） */
+.attachment-indicator {
+  font-size: 14px;
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: underline; /* 下划线 */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.attachment-indicator:hover {
+  color: #66b1ff;
 }
 
 .article-content p {
@@ -357,24 +484,6 @@ onMounted(() => {
   color: #606266;
   line-height: 1.5;
   word-break: break-all;
-}
-
-.article-attachments {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed #ebeef5;
-}
-
-.attachment-label {
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 5px;
-}
-
-.file-item-display {
-  font-size: 13px;
-  color: #409eff;
-  margin-bottom: 2px;
 }
 
 .empty-tip {
@@ -387,5 +496,44 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+/* 对话框内附件列表样式 */
+.dialog-attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-attachment-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dialog-attachment-item:hover {
+  background-color: #e4e7ed;
+}
+
+.attachment-name {
+  flex: 1;
+  margin: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-icon {
+  color: #409eff;
+}
+
+.empty-attachment {
+  text-align: center;
+  color: #909399;
+  padding: 20px;
 }
 </style>
