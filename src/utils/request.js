@@ -1,6 +1,7 @@
 // src/utils/request.js
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import JSONBig from 'json-bigint' // 引入库
 
 // 创建 axios 实例
 const service = axios.create({
@@ -12,7 +13,25 @@ const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API || '', 
 
   
-  timeout: 5000    // 请求超时时间
+  timeout: 5000,    // 请求超时时间
+
+  // 【关键修改】使用 transformResponse 在 Axios 默认解析前处理数据
+  // data 是后端的原始响应字符串
+  transformResponse: [function (data) {
+    try {
+      // 如果 data 为空或非字符串，直接返回
+      if (!data || typeof data !== 'string') return data;
+      
+      // 使用 JSONBig 解析原始字符串
+      // JSONBig 会自动将超过安全范围的数字转换为字符串
+      return JSONBig.parse(data);
+    } catch (err) {
+      // 如果解析失败（例如不是 JSON），返回原始数据
+      console.warn('JSONBig parse failed, returning raw data', err);
+      return data;
+    }
+  }]
+
 })
 
 // 请求拦截器
@@ -71,6 +90,8 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.msg || 'Error'))
     } else {
       return res
+      //debugger;
+      //return JSONBig.parse(JSON.stringify(res)) 
     }
   },
   error => {

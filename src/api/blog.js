@@ -38,6 +38,8 @@ export function addArticle(data) {
 export function deleteArticle(id) {
   return request({
     url: `/api/articles/${id}`,
-    method: 'delete'
+    method: 'delete',
+    // 删除 params: { id }，避免生成 /api/articles/123?id=123 这种奇怪的结构
+    //params: { id }
   })
 }

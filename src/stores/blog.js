@@ -113,6 +113,10 @@ export const useBlogStore = defineStore('blog', () => {
     loading.value = true
     try {
       debugger;
+      // 调试日志：检查传入的 id 类型和值
+      console.log('Deleting article with ID:', id, 'Type:', typeof id);
+
+      
       await apiDeleteArticle(id)
       //articles.value = articles.value.filter(item => item.id !== id)
       // 删除后，如果当前页数据为空且不是第一页，建议跳回上一页
