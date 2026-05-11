@@ -205,6 +205,7 @@ const getCurrentTitle = computed(() => {
   if (route.path === '/visualization') return '数据可视化'
   if (route.path === '/rabbitmq') return '消息队列'
   if (route.path === '/elasticsearch') return '模糊查询'
+  if (route.path === '/excelbatch') return 'excel批量处理'
   return '我的日记博客'
 })
 
@@ -214,6 +215,7 @@ const activeMenuIndex = computed(() => {
   if (route.path === '/visualization') return '/visualization'
   if (route.path === '/rabbitmq') return '/rabbitmq'
   if (route.path === '/elasticsearch') return '/elasticsearch'
+  if (route.path === '/excelbatch') return '/excelbatch'
   return '/home'
 })
 
@@ -275,7 +277,7 @@ const handleCurrentChange = (val) => {
 
 // 【新增】显示附件列表
 const showAttachments = (article) => {
-  debugger;
+  //debugger;
   console.log('Current Article Attachments:', article.attachments);
   currentAttachments.value = article.attachments || []
   dialogVisible.value = true

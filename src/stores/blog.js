@@ -14,7 +14,7 @@ export const useBlogStore = defineStore('blog', () => {
   const total = ref(0)
   // 获取文章
   async function fetchArticles(page = 1, size = 10) {
-    debugger;
+    //debugger;
     loading.value = true
     try {
       // 调用 API 传入分页参数
@@ -40,7 +40,7 @@ export const useBlogStore = defineStore('blog', () => {
 
   // 添加文章
   async function addArticle(title, content, files = []) {
-    debugger;
+    //debugger;
     if (!title.trim() || !content.trim()) {
       ElMessage.warning('标题和内容不能为空')
       return false
@@ -112,7 +112,7 @@ export const useBlogStore = defineStore('blog', () => {
   async function deleteArticle(id) {
     loading.value = true
     try {
-      debugger;
+      //debugger;
       // 调试日志：检查传入的 id 类型和值
       console.log('Deleting article with ID:', id, 'Type:', typeof id);
 

@@ -39,7 +39,7 @@ service.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
     let token = localStorage.getItem('token')
-    debugger;
+    //debugger;
     if (token) {
       // 假设后端要求 Header 中携带 Authorization: Bearer <token>
       //config.headers['Authorization'] = `Bearer ${token}`
@@ -98,7 +98,7 @@ service.interceptors.response.use(
     console.error('Response Error:', error)
     let message = '网络异常'
     if (error.response) {
-      debugger;
+      //debugger;
       switch (error.response.status) {
         case 401:
           message = '未授权，请重新登录'

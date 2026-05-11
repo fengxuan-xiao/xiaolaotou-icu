@@ -1,12 +1,13 @@
 <template>
   <div class="visualization-container">
-    
 
     <!-- 标题栏 -->
     <div class="header-actions">
       <h2>数据可视化大屏</h2>
       <el-button type="primary" link @click="goHome">
-        <el-icon><HomeFilled /></el-icon>
+        <el-icon>
+          <HomeFilled />
+        </el-icon>
         <span style="margin-left: 5px;">返回首页</span>
       </el-button>
     </div>
@@ -14,45 +15,40 @@
     <!-- 顶部操作栏 -->
     <div class="filter-bar">
       <div class="filter-row">
-        <!-- 第一行：省市县 -->
-        <el-select v-model="queryForm.province" placeholder="请选择省份" style="width: 150px" @change="handleAreaChange('province')">
-          <el-option label="浙江省" value="zhejiang" />
-          <el-option label="广东省" value="guangdong" />
-          <el-option label="江苏省" value="jiangsu" />
+        <!-- 第一行：省市县 (使用 Store 数据) -->
+        <el-select v-model="queryForm.province" placeholder="请选择省份" style="width: 150px" @change="handleProvinceChange"
+          :loading="areaStore.loading">
+          <el-option v-for="item in areaStore.provinces" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-select v-model="queryForm.city" placeholder="请选择城市" style="width: 150px; margin-left: 10px" @change="handleAreaChange('city')">
-          <el-option label="杭州市" value="hangzhou" />
-          <el-option label="宁波市" value="ningbo" />
-          <el-option label="广州市" value="guangzhou" />
+
+        <el-select v-model="queryForm.city" placeholder="请选择城市" style="width: 150px; margin-left: 10px"
+          @change="handleCityChange" :disabled="!queryForm.province" :loading="areaStore.loading">
+          <el-option v-for="item in areaStore.cities" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-select v-model="queryForm.district" placeholder="请选择区县" style="width: 150px; margin-left: 10px">
-          <el-option label="西湖区" value="xihu" />
-          <el-option label="余杭区" value="yuhang" />
-          <el-option label="天河区" value="tianhe" />
+
+        <el-select v-model="queryForm.district" placeholder="请选择区县" style="width: 150px; margin-left: 10px"
+          :disabled="!queryForm.city" :loading="areaStore.loading">
+          <el-option v-for="item in areaStore.districts" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </div>
 
       <div class="filter-row" style="margin-top: 10px;width:650px">
         <!-- 第二行：日期范围与操作按钮 -->
-        <el-date-picker
-          v-model="queryForm.dateRange"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          class="date-picker-custom" 
-          style="width: 150px !important;" 
-        />
-        
+        <el-date-picker v-model="queryForm.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+          end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="date-picker-custom"
+          style="width: 150px !important;" />
+
         <div style="margin-left: 10px; display: flex; gap: 10px;">
           <el-button type="primary" :loading="loading" @click="handleQuery">
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
             <span>查询</span>
           </el-button>
           <el-button @click="handleReset">
-            <el-icon><Refresh /></el-icon>
+            <el-icon>
+              <Refresh />
+            </el-icon>
             <span>重置</span>
           </el-button>
         </div>
@@ -61,22 +57,15 @@
 
     <!-- 2x2 网格布局 -->
     <div class="chart-grid">
-      <!-- 左上：访问来源统计 (图1) -->
       <div class="chart-wrapper">
         <div ref="chartRef1" class="chart-instance"></div>
       </div>
-
-      <!-- 右上：用户增长趋势 (图2) -->
       <div class="chart-wrapper">
         <div ref="chartRef2" class="chart-instance"></div>
       </div>
-
-      <!-- 左下：旋转滚动柱状图 (图3 - 基于图1旋转并循环滚动) -->
       <div class="chart-wrapper">
         <div ref="chartRef3" class="chart-instance"></div>
       </div>
-
-      <!-- 右下：南丁格尔玫瑰图 (图4) -->
       <div class="chart-wrapper">
         <div ref="chartRef4" class="chart-instance"></div>
       </div>
@@ -87,16 +76,35 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus' // 引入消息提示
 import * as echarts from 'echarts'
 import { HomeFilled, Search, Refresh } from '@element-plus/icons-vue'
-
+import { useAreaStore } from '@/stores/visualization'
+import { getVisualizationData } from '@/api/visualization'
 
 const router = useRouter()
+const areaStore = useAreaStore()
 
-// 获取默认日期范围
+// 获取默认日期范围 (今年1月1日 至 今天)
 const getDefaultDateRange = () => {
-  const today = new Date().toISOString().split('T')[0]
-  return [today, today]
+  const now = new Date()
+
+  // 1. 获取今年的年份
+  const currentYear = now.getFullYear()
+
+  // 2. 构建开始日期：今年1月1日
+  const startDate = new Date(currentYear, 0, 1) // 月份从0开始，0代表1月
+
+  // 3. 格式化函数 YYYY-MM-DD
+  const formatDate = (date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
+  // 4. 返回 [开始日期, 结束日期(今天)]
+  return [formatDate(startDate), formatDate(now)]
 }
 
 // 筛选表单数据
@@ -117,56 +125,55 @@ const chartRef4 = ref(null)
 
 // 图表实例存储
 let charts = []
-let scrollTimer3 = null // 用于控制图3滚动的定时器
+let scrollTimer3 = null
 
 // 返回首页
 const goHome = () => {
   router.push('/blog')
 }
 
-// 模拟后端数据获取
-const fetchBackendData = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        // 图1数据：7个类目
-        chart1: {
-          categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          data: [120, 200, 150, 80, 70, 110, 130]
-        },
-        chart2: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-          data: Array.from({ length: 6 }, () => Math.floor(Math.random() * 1000 + 500))
-        },
-        // 图3数据：为了演示滚动效果，我们使用与图1相同的数据结构，但可以是更多数据
-        // 这里我们复用 chart1 的数据作为基础，或者生成新数据
-        chart3: {
-          categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          data: [120, 200, 150, 80, 70, 110, 130]
-        },
-        chart4: [
-          { value: 40, name: '技术文章' },
-          { value: 38, name: '生活随笔' },
-          { value: 32, name: '学习笔记' },
-          { value: 30, name: '项目复盘' },
-          { value: 28, name: '转载分享' }
-        ]
-      })
-    }, 800)
-  })
+// --- 地区联动逻辑 ---
+
+const handleProvinceChange = async (val) => {
+  queryForm.city = ''
+  queryForm.district = ''
+  if (val) {
+    await areaStore.loadCitiesByProvince(val)
+  } else {
+    areaStore.cities = []
+    areaStore.districts = []
+  }
 }
 
-// 初始化图表配置
+const handleCityChange = async (val) => {
+  queryForm.district = ''
+  if (val) {
+    await areaStore.loadDistrictsByCity(val)
+  } else {
+    areaStore.districts = []
+  }
+}
+
+// --- 图表相关逻辑 ---
+
 const initChartsConfig = () => {
   // 1. 左上：柱状图
   if (chartRef1.value) {
     const chart = echarts.init(chartRef1.value)
     chart.setOption({
-      title: { text: '访问来源统计', left: 'center' },
+      title: { text: '平均参保人数统计', left: 'center' },
       tooltip: { trigger: 'axis' },
       grid: { containLabel: true, bottom: '10%' },
       xAxis: { type: 'category', data: [] },
-      yAxis: { type: 'value' },
+      yAxis: {
+        type: 'value',
+        min: 2300,       // 最小值
+        max: 2600,     // 最大值 (或者使用 'dataMax' 自动适应最大值)
+        interval: 50, // 刻度间隔
+        axisLabel: {
+          formatter: '{value}' // 格式化标签
+        }
+      },
       series: [{ data: [], type: 'bar', itemStyle: { color: '#409EFF' } }]
     })
     charts.push(chart)
@@ -176,36 +183,42 @@ const initChartsConfig = () => {
   if (chartRef2.value) {
     const chart = echarts.init(chartRef2.value)
     chart.setOption({
-      title: { text: '用户增长趋势', left: 'center' },
+      title: { text: '净值趋势', left: 'center' },
       tooltip: { trigger: 'axis' },
       grid: { containLabel: true, bottom: '10%' },
       xAxis: { type: 'category', boundaryGap: false, data: [] },
-      yAxis: { type: 'value' },
+      //yAxis: { type: 'value' },
+      yAxis: {
+        type: 'value',
+        min: 1.0,       // 改为更直观的数值
+        max: 1.7,
+        interval: 0.2,  // 调整间隔，让刻度更密集或稀疏
+        axisLabel: {
+          // 保留两位小数，例如显示 1.00, 1.20
+          formatter: (value) => {
+            return value.toFixed(6);
+          }
+        }
+      },
       series: [{ data: [], type: 'line', smooth: true, areaStyle: { opacity: 0.3 }, itemStyle: { color: '#67C23A' } }]
     })
     charts.push(chart)
   }
 
-  // 3. 左下：旋转滚动柱状图 (基于图1旋转90度 + 循环滚动)
+  // 3. 左下：旋转滚动柱状图
   if (chartRef3.value) {
     const chart = echarts.init(chartRef3.value)
     const option = {
-      title: { text: '实时热度排行 (循环滚动)', left: 'center' },
+      title: { text: '平均参保金额统计 (循环滚动)', left: 'center' },
       grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-      // X轴为数值轴 (原图1的Y轴)
-      xAxis: { 
-        type: 'value', 
-        boundaryGap: [0, 0.01],
-        splitLine: { show: false }
+      xAxis: {
+        type: 'value',
+        min: 1500,   // 设置最小值
+        max: 2500,   // 设置最大值
+        interval: 200,
+        boundaryGap: [0, 0.01], splitLine: { show: false }
       },
-      // Y轴为类目轴 (原图1的X轴)，inverse:true 让第一个数据在最上面
-      yAxis: { 
-        type: 'category', 
-        data: [],
-        inverse: true, 
-        axisTick: { show: false },
-        axisLine: { show: false }
-      },
+      yAxis: { type: 'category', data: [], inverse: true, axisTick: { show: false }, axisLine: { show: false } },
       series: [{
         name: '热度指数',
         type: 'bar',
@@ -227,9 +240,10 @@ const initChartsConfig = () => {
 
   // 4. 右下：南丁格尔玫瑰图
   if (chartRef4.value) {
+    //debugger;
     const chart = echarts.init(chartRef4.value)
     chart.setOption({
-      title: { text: '内容分布占比', left: 'center' },
+      title: { text: '参保年龄分布占比', left: 'center' },
       tooltip: { trigger: 'item' },
       legend: { top: 'bottom', type: 'scroll' },
       series: [
@@ -248,104 +262,176 @@ const initChartsConfig = () => {
   }
 }
 
-// 启动左下角图表的循环滚动动画
-// 逻辑：将数组第一个元素移到最后，其余前移
 const startCircularScroll = (chart, initialCategories, initialData) => {
   if (scrollTimer3) clearInterval(scrollTimer3)
-  
-  // 深拷贝数据，避免修改原始引用
+  // 防御性编程：如果没有数据则不启动定时器
+  if (!initialCategories || initialCategories.length === 0) return
+
   let currentCategories = [...initialCategories]
   let currentData = [...initialData]
 
   scrollTimer3 = setInterval(() => {
     if (currentCategories.length === 0) return
-
-    // 1. 取出第一个元素
     const firstCat = currentCategories.shift()
     const firstVal = currentData.shift()
-
-    // 2. 放到最后
     currentCategories.push(firstCat)
     currentData.push(firstVal)
-
-    // 3. 更新图表
     chart.setOption({
       yAxis: { data: currentCategories },
       series: [{ data: currentData }]
     })
-  }, 1500) // 每1.5秒滚动一行
+  }, 1500)
 }
 
-// 更新图表数据
-const updateChartsData = (data) => {
+const updateChartsData = (vo) => {
+  // 1. 防御性检查
+  if (!vo) {
+    console.warn('Visualization data is empty or undefined')
+    return
+  }
+
   // 更新图1
-  charts[0].setOption({
-    xAxis: { data: data.chart1.categories },
-    series: [{ data: data.chart1.data }]
-  })
+  if (vo.chart1 && charts[0]) {
+    charts[0].setOption({
+      xAxis: { data: vo.chart1.categories || [] },
+      series: [{ data: vo.chart1.data || [] }]
+    })
+  }
 
   // 更新图2
-  charts[1].setOption({
-    xAxis: { data: data.chart2.categories },
-    series: [{ data: data.chart2.data }]
-  })
+  if (vo.chart2 && charts[1]) {
+    charts[1].setOption({
+      xAxis: { data: vo.chart2.categories || [] },
+      series: [{ data: vo.chart2.data || [] }]
+    })
+  }
 
-  // 更新图3 (启动循环滚动)
-  // 注意：这里我们使用 data.chart3 的数据，如果希望完全复用图1数据，可以使用 data.chart1
-  const chart3Data = data.chart3 || data.chart1 
-  charts[2].setOption({
-    yAxis: { data: chart3Data.categories },
-    series: [{ data: chart3Data.data }]
-  })
-  // 重新启动滚动动画
-  startCircularScroll(charts[2], chart3Data.categories, chart3Data.data)
+  // 更新图3 (先停再更，最后再启)
+  if (vo.chart3 && charts[2]) {
+    const chart3Data = vo.chart3
 
-  // 更新图4
-  charts[3].setOption({
-    series: [{ data: data.chart4 }]
-  })
+    // A. 先停止当前的滚动定时器，避免冲突
+    if (scrollTimer3) {
+      clearInterval(scrollTimer3)
+      scrollTimer3 = null
+    }
+
+    // B. 更新静态数据
+    charts[2].setOption({
+      yAxis: { data: chart3Data.categories || [] },
+      series: [{ data: chart3Data.data || [] }]
+    })
+
+    // C. 使用新数据重新启动滚动
+    startCircularScroll(charts[2], chart3Data.categories, chart3Data.data)
+  }
+
+  //debugger;
+  // 更新图4 (南丁格尔玫瑰图)
+  if (vo.chart4 && charts[3]) {
+
+    console.log('Raw vo.chart4:', vo.chart4);
+
+    // 1. 获取数据并转换为 ECharts 需要的格式 { name, value }
+    // 假设 vo.chart4 是一个对象，包含 categories 和 data，或者直接是数组
+    // 这里根据你 chart1-3 的结构，假设 vo.chart4 也有 categories 和 data
+    // const pieData = (vo.chart4.categories || []).map((name, index) => {
+    //   return {
+    //     name: name,
+    //     value: vo.chart4.data ? vo.chart4.data[index] : 0
+    //   }
+    // })
+    const pieData = vo.chart4.map(item => ({
+      name: item.name,
+      value: item.value
+    }))
+
+    // 打印调试信息（确认进入此分支）
+    console.log('Updating Chart 4 with data:', pieData)
+
+    charts[3].setOption({
+      series: [{
+        type: 'pie', // 显式指定类型，防止配置丢失
+        data: pieData
+      }]
+    })
+  } else {
+    console.warn('Chart 4 update skipped. vo.chart4:', vo.chart4, 'charts[3]:', charts[3])
+  }
 }
 
-// 查询按钮点击事件
+// 核心查询方法
 const handleQuery = async () => {
   loading.value = true
   try {
-    const data = await fetchBackendData()
-    updateChartsData(data)
+    // 1. 处理日期格式：从 "YYYY-MM-DD" 转为 "YYYYMM"
+    let startDate = ''
+    let endDate = ''
+
+    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
+      // 例如: "2023-01-01" -> "202301"
+      startDate = queryForm.dateRange[0].replace(/-/g, '').substring(0, 6)
+      endDate = queryForm.dateRange[1].replace(/-/g, '').substring(0, 6)
+    } else {
+      // 默认使用当前月份
+      const defaultDate = new Date().toISOString().split('T')[0].replace(/-/g, '').substring(0, 6)
+      startDate = defaultDate
+      endDate = defaultDate
+    }
+
+    // 2. 构建请求参数
+    const params = {
+      province: queryForm.province || undefined,
+      city: queryForm.city || undefined,
+      district: queryForm.district || undefined,
+      startDate: startDate,
+      endDate: endDate
+    }
+
+    // 3. 调用后端接口
+    // 假设 request 拦截器已经处理了 Result 包装，直接返回 data 字段的内容
+    // 如果未处理，则需要 const res = await getVisualizationData(params); const vo = res.data;
+    const res = await getVisualizationData(params)
+    const vo = res.data
+
+    // 4. 更新图表
+    updateChartsData(vo)
+
   } catch (error) {
     console.error('Fetch data error:', error)
+    ElMessage.error('数据加载失败，请稍后重试')
   } finally {
     loading.value = false
   }
 }
 
-// 重置按钮点击事件
 const handleReset = () => {
   queryForm.province = ''
   queryForm.city = ''
   queryForm.district = ''
   queryForm.dateRange = getDefaultDateRange()
+
+  // 重置 Store 中的下级数据
+  areaStore.cities = []
+  areaStore.districts = []
+
   handleQuery()
 }
 
-// 级联选择变化处理
-const handleAreaChange = (level) => {
-  if (level === 'province') {
-    queryForm.city = ''
-    queryForm.district = ''
-  } else if (level === 'city') {
-    queryForm.district = ''
-  }
-}
-
-// 窗口 resize 处理
 const handleResize = () => {
   charts.forEach(chart => chart && chart.resize())
 }
 
 onMounted(() => {
+  // 1. 初始化加载省份数据
+  areaStore.loadProvinces()
+
+  // 2. 初始化图表
   initChartsConfig()
+
+  // 3. 首次查询
   handleQuery()
+
   window.addEventListener('resize', handleResize)
 })
 
@@ -357,22 +443,21 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* 强制日期选择器宽度 */
+/* 样式部分保持不变 */
 .date-picker-custom {
   width: 150px !important;
   max-width: 150px !important;
 }
 
-/* 深度选择器：调整内部输入框的 padding，防止文字溢出或显示不全 */
 .date-picker-custom :deep(.el-input__wrapper) {
   padding-left: 5px;
   padding-right: 5px;
 }
 
-/* 如果希望 placeholder 文字更小以适应窄宽度 */
 .date-picker-custom :deep(.el-input__inner) {
-  font-size: 12px; 
+  font-size: 12px;
 }
+
 .visualization-container {
   padding: 10px 20px;
   height: 100vh;
@@ -439,15 +524,14 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, 350px);
   }
-  
+
   .filter-row {
     flex-wrap: wrap;
     gap: 10px;
   }
-  
-  .filter-row > * {
+
+  .filter-row>* {
     margin-left: 0 !important;
   }
-  
 }
 </style>
