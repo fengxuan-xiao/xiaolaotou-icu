@@ -1,59 +1,67 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
-import Blog from '../views/Blog.vue'
+import Home from '../views/Home.vue' // 主页布局
+import Blog from '../views/Blog.vue' // 博客管理/新增页
 import Visualization from '@/views/Visualization.vue'
 import Report from '@/views/Report.vue'
 import Rabbitmq from '@/views/Rabbitmq.vue'
 import Elasticsearch from '@/views/Elasticsearch.vue'
 import Excelbatch from '@/views/Excelbatch.vue'
-//导入 useUserStore
 import { useUserStore } from '@/stores/user' 
 
 const routes = [
-  {
-    path: '/',
-    redirect: '/login' // 添加这一行，访问根路径时自动跳转到登录页
-  },
   {
     path: '/login',
     name: 'Login',
     component: Login
   },
+  
+  {
+    path: '/',
+    redirect: '/home' // 根路径重定向到 home
+  },
+  {
+    path: '/home',
+    name: 'Home',
+    component: Home, // 直接使用 Home 组件，不再作为 Layout
+    meta: { title: '博客首页' }
+  },
+  // 独立的管理页面，需要登录
   {
     path: '/blog',
-    name: 'Blog',
-    component: () => import('@/views/Blog.vue'), // 假设你的博客列表页叫 Blog.vue
-    meta: { requiresAuth: true } // 需要登录才能访问
+    name: 'BlogManage',
+    component: Blog,
+    meta: { requiresAuth: true, title: '博客管理' }
   },
   {
     path: '/visualization',
     name: 'Visualization',
     component: Visualization,
-    meta: { title: '数据可视化' }
+    meta: { title: '数据可视化', requiresAuth: true }
   },
   {
     path: '/report',
     name: 'Report',
     component: Report,
-    meta: { title: '统计报表' }
+    meta: { title: '统计报表', requiresAuth: true }
   },
   {
     path: '/rabbitmq',
     name: 'Rabbitmq',
     component: Rabbitmq,
-    meta: { title: '消息队列' }
+    meta: { title: '消息队列', requiresAuth: true }
   },
   {
     path: '/elasticsearch',
     name: 'Elasticsearch',
     component: Elasticsearch,
-    meta: { title: '模糊查询' }
+    meta: { title: '模糊查询', requiresAuth: true }
   },
   {
     path: '/excelbatch',
     name: 'Excelbatch',
     component: Excelbatch,
-    meta: { title: '批量导入' }
+    meta: { title: '批量导入', requiresAuth: true }
   }
 ]
 
@@ -62,25 +70,26 @@ const router = createRouter({
   routes
 })
 
-// 【关键】全局前置守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
-  const isAuthenticated = userStore.isLoggedIn // 从 store 中获取登录状态
+  const isAuthenticated = userStore.isLoggedIn
 
-  // 如果目标路由需要认证
+  if (to.meta.title) {
+    document.title = to.meta.title + ' - 我的博客'
+  } else {
+    document.title = '我的博客'
+  }
+
   if (to.meta.requiresAuth) {
     if (isAuthenticated) {
-      // 已登录，允许访问
       next()
     } else {
-      // 未登录，重定向到登录页，并记录原本想去的地址（方便登录后跳回）
       next({
         path: '/login',
         query: { redirect: to.fullPath }
       })
     }
   } else {
-    // 不需要认证的路由（如登录页），直接放行
     next()
   }
 })
