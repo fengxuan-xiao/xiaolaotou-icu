@@ -5,6 +5,7 @@ import Visualization from '@/views/Visualization.vue'
 import Report from '@/views/Report.vue'
 import Rabbitmq from '@/views/Rabbitmq.vue'
 import Elasticsearch from '@/views/Elasticsearch.vue'
+import Excelbatch from '@/views/Excelbatch.vue'
 //导入 useUserStore
 import { useUserStore } from '@/stores/user' 
 
@@ -47,14 +48,13 @@ const routes = [
     name: 'Elasticsearch',
     component: Elasticsearch,
     meta: { title: '模糊查询' }
+  },
+  {
+    path: '/excelbatch',
+    name: 'Excelbatch',
+    component: Excelbatch,
+    meta: { title: '批量导入' }
   }
-  // ,
-  // {
-  //   path: '/exclePL',
-  //   name: 'ExclePL',
-  //   component: ExclePL,
-  //   meta: { title: '批量导入' }
-  // }
 ]
 
 const router = createRouter({

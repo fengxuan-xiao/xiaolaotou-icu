@@ -12,10 +12,10 @@
       <!-- 登录表单 -->
       <el-form v-if="!isRegister" ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="0" class="form">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入账号" prefix-icon="User" clearable />
+          <el-input v-model="loginForm.username" placeholder="请输入账号" :prefix-icon="User" clearable />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" prefix-icon="Lock" show-password />
+          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
         </el-form-item>
         <!-- 使用 store 中的 loading 状态 -->
         <el-button type="primary" class="submit-btn" @click="handleLogin" :loading="userStore.loading">登录</el-button>
@@ -24,10 +24,10 @@
       <!-- 注册表单 -->
       <el-form v-else ref="registerFormRef" :model="registerForm" :rules="registerRules" label-width="0" class="form">
         <el-form-item prop="username">
-          <el-input v-model="registerForm.username" placeholder="请输入账号" prefix-icon="User" clearable />
+          <el-input v-model="registerForm.username" placeholder="请输入账号" :prefix-icon="User" clearable />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" prefix-icon="Lock" show-password />
+          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
         </el-form-item>
         <!-- 使用 store 中的 loading 状态 -->
         <el-button type="success" class="submit-btn" @click="handleRegister" :loading="userStore.loading">注册</el-button>
@@ -52,6 +52,8 @@ import { ref, reactive } from 'vue'
 
 import { useRouter, useRoute } from 'vue-router' // 引入 useRoute
 import { useUserStore } from '@/stores/user' // 引入 User Store
+// 1. 从 @element-plus/icons-vue 导入需要的图标
+import { User, Lock } from '@element-plus/icons-vue'
 
 const route = useRoute() // 获取 route 对象
 const router = useRouter()// 获取当前路由信息

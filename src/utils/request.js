@@ -83,10 +83,25 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    debugger;
     const res = response.data
+
+    // 【关键修改】如果响应类型是 blob (通常用于文件下载)，直接返回数据，不进行 JSON 逻辑判断
+    if (response.config.responseType === 'blob') {
+      return res
+    }
+
     // 假设后端返回格式为 { code: 200, data: ..., msg: "..." }
-    if (res.code !== 200) {
+    if (res.code && res.code !== 200) {
+
+      
       ElMessage.error(res.msg || '系统错误')
+
+      // 这里可以处理特定的错误码，例如 401 登录过期
+      if (res.code === 401) {
+        // to re-login
+      }
+
       return Promise.reject(new Error(res.msg || 'Error'))
     } else {
       return res
@@ -95,6 +110,7 @@ service.interceptors.response.use(
     }
   },
   error => {
+    console.log('err' + error) // for debug
     console.error('Response Error:', error)
     let message = '网络异常'
     if (error.response) {

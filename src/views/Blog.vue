@@ -41,7 +41,7 @@
           <el-icon><Document /></el-icon>
           <span>ES模糊查询模块</span>
         </el-menu-item>
-        <el-menu-item index="/elasticsearch">
+        <el-menu-item index="/excelbatch">
           <el-icon><Document /></el-icon>
           <span>Excle批量导入模块</span>
         </el-menu-item>
