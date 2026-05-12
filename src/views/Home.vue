@@ -415,7 +415,8 @@ onMounted(() => {
   line-height: 1.6;
   word-break: break-all;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2; /* 旧版 WebKit 浏览器 */
+  line-clamp: 2;         /* 标准属性，消除警告 */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

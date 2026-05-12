@@ -262,9 +262,9 @@ onMounted(() => {
   color: #303133;
 }
 
-.manage-content {
+/* .manage-content { */
   /* 内容区域 */
-}
+/* } */
 
 .input-card, .list-card {
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
