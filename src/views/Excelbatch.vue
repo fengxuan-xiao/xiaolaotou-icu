@@ -1,5 +1,18 @@
 <template>
   <div class="excel-batch-container">
+
+    <!-- 标题栏 -->
+    <div class="header-actions">
+      <h2>批量导入</h2>
+      <el-button type="primary" link @click="router.push('/home')">
+        <el-icon>
+          <HomeFilled />
+        </el-icon>
+        <span style="margin-left: 5px;">返回首页</span>
+      </el-button>
+    </div>
+
+
     <!-- 上方：操作区域 -->
     <el-card class="operation-area" shadow="never">
       <div class="flex-row align-center justify-between">
@@ -117,8 +130,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useExcelBatchStore } from '@/stores/excelbatch'
 import { Download, Upload, Search } from '@element-plus/icons-vue'
+
+const router = useRouter()
 
 const store = useExcelBatchStore()
 
@@ -167,5 +183,19 @@ store.fetchList('SUCCESS')
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 5px;
+}
+
+.header-actions h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #303133;
 }
 </style>

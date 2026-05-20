@@ -3,7 +3,7 @@
 
     <!-- 标题栏 -->
     <div class="header-actions">
-      <h2>数据可视化大屏</h2>
+      <h2>{{ route.meta.title || '默认标题' }}</h2>
       <el-button type="primary" link @click="goHome">
         <el-icon>
           <HomeFilled />
@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter,useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus' // 引入消息提示
 import * as echarts from 'echarts'
 import { HomeFilled, Search, Refresh } from '@element-plus/icons-vue'
@@ -83,6 +83,7 @@ import { useAreaStore } from '@/stores/visualization'
 import { getVisualizationData } from '@/api/visualization'
 
 const router = useRouter()
+const route = useRoute()
 const areaStore = useAreaStore()
 
 // 获取默认日期范围 (今年1月1日 至 今天)
@@ -129,7 +130,7 @@ let scrollTimer3 = null
 
 // 返回首页
 const goHome = () => {
-  router.push('/blog')
+  router.push('/home')
 }
 
 // --- 地区联动逻辑 ---
@@ -484,8 +485,14 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 0 5px;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+
+
+
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
 }
 
 .header-actions h2 {

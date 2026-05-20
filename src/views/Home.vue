@@ -60,6 +60,16 @@
           <el-icon><Upload /></el-icon>
           <span>批量导入</span>
         </el-menu-item>
+
+        <el-menu-item index="/rabbitmq" :disabled="!userStore.isLoggedIn">
+          <el-icon><Operation /></el-icon>
+          <span>消息队列模块</span>
+        </el-menu-item>
+
+        <el-menu-item index="/elasticsearch" :disabled="!userStore.isLoggedIn">
+          <el-icon><Search /></el-icon>
+          <span>ES模糊查询</span>
+        </el-menu-item>
       </el-menu>
     </el-drawer>
 
@@ -161,7 +171,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useBlogStore } from '@/stores/blog'
 // 引入所需图标 (合并了 test.vue 和 home.vue 的图标)
-import { Menu, HomeFilled, Edit, DataLine, TrendCharts, Upload, User, Paperclip, Document, Download } from '@element-plus/icons-vue'
+import { Menu, HomeFilled, Edit, DataLine, TrendCharts, Upload, User, Paperclip, Document, Download , Operation,Search} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 

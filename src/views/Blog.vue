@@ -2,10 +2,13 @@
   <div class="blog-manage-container">
     <!-- 简单的顶部返回栏 -->
     <div class="top-bar">
-      <el-button type="primary" link @click="router.push('/home')">
-        <el-icon><ArrowLeft /></el-icon> 返回首页
-      </el-button>
       <h2>博客管理 / 新增文章</h2>
+
+      <el-button type="primary" link @click="router.push('/home')">
+        <el-icon><ArrowLeft /></el-icon> 
+        <span style="margin-left: 5px;">返回首页</span>
+      </el-button>
+      
     </div>
 
     <div class="manage-content">
@@ -254,6 +257,8 @@ onMounted(() => {
   padding: 10px 20px;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+
+  justify-content: space-between;
 }
 
 .top-bar h2 {

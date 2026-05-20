@@ -31,37 +31,37 @@ const routes = [
     path: '/blog',
     name: 'BlogManage',
     component: Blog,
-    meta: { requiresAuth: true, title: '博客管理' }
+    meta: { requiresAuth: true, title: '博客管理模块' }
   },
   {
     path: '/visualization',
     name: 'Visualization',
     component: Visualization,
-    meta: { title: '数据可视化', requiresAuth: true }
+    meta: { title: '数据可视化模块', requiresAuth: true }
   },
   {
     path: '/report',
     name: 'Report',
     component: Report,
-    meta: { title: '统计报表', requiresAuth: true }
+    meta: { title: '统计报表模块', requiresAuth: true }
   },
   {
     path: '/rabbitmq',
     name: 'Rabbitmq',
     component: Rabbitmq,
-    meta: { title: '消息队列', requiresAuth: true }
+    meta: { title: '消息队列模块', requiresAuth: true }
   },
   {
     path: '/elasticsearch',
     name: 'Elasticsearch',
     component: Elasticsearch,
-    meta: { title: '模糊查询', requiresAuth: true }
+    meta: { title: '模糊查询模块', requiresAuth: true }
   },
   {
     path: '/excelbatch',
     name: 'Excelbatch',
     component: Excelbatch,
-    meta: { title: '批量导入', requiresAuth: true }
+    meta: { title: '批量导入模块', requiresAuth: true }
   }
 ]
 
