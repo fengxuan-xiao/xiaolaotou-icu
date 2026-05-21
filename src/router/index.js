@@ -42,8 +42,8 @@ const routes = [
   {
     path: '/report',
     name: 'Report',
-    //component: Report,
-    component: () => import('@/views/Report.vue'),
+    //component: Report,应用启动时立即加载
+    component: () => import('@/views/Report.vue'),//懒加载，访问路由时才加载
     meta: { title: '统计报表模块', requiresAuth: true }
   },
   {
