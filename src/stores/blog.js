@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getArticles, addArticle as apiAddArticle, deleteArticle as apiDeleteArticle } from '@/api/blog'
+import { getArticles,getArticlesHome, addArticle as apiAddArticle, deleteArticle as apiDeleteArticle } from '@/api/blog'
 import { ElMessage } from 'element-plus'
 
 export const useBlogStore = defineStore('blog', () => {
@@ -32,6 +32,30 @@ export const useBlogStore = defineStore('blog', () => {
         pageSize.value = size
       }
     } catch (error) {
+      console.error('Fetch articles failed', error)
+    } finally {
+      loading.value = false
+    }
+  }
+
+
+  // 获取文章
+  async function fetchArticlesHome(page = 1, size = 10) {
+    debugger;
+    loading.value = true
+    try {
+      debugger;
+      // 调用 API 传入分页参数
+      const res = await getArticlesHome({ page, pageSize: size })
+
+      if (res.data) {
+        articles.value = res.data.list || []
+        total.value = res.data.total || 0
+        currentPage.value = page
+        pageSize.value = size
+      }
+    } catch (error) {
+      debugger;
       console.error('Fetch articles failed', error)
     } finally {
       loading.value = false
@@ -134,5 +158,5 @@ export const useBlogStore = defineStore('blog', () => {
     total,       // 暴露总条数
     currentPage, // 暴露当前页
     pageSize,    // 暴露每页大小 
-    fetchArticles, addArticle, deleteArticle }
+    fetchArticles, addArticle, deleteArticle,fetchArticlesHome }
 })

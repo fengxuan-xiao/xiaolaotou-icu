@@ -18,12 +18,23 @@ export const useUserStore = defineStore('user', () => {
     loading.value = true
     try {
       const res = await apiLogin(loginForm)
-      //debugger;
+      debugger;
       // 假设 res.data 是 token
       const newToken = res.data
       
       token.value = newToken
       localStorage.setItem('token', newToken)
+
+      // 【关键修改】将登录表单中的用户名存入 userInfo
+      // 注意：这里假设 loginForm 中有 username 字段
+      if (loginForm.username) {
+        userInfo.value = {
+          username: loginForm.username
+          // 如果后端返回了其他用户信息，也可以在这里合并，例如: ...res.data.userInfo
+        }
+        // 可选：持久化存储 userInfo，防止刷新页面后丢失用户名
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+      }
       
       ElMessage.success('登录成功')
       return true

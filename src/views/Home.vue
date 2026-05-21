@@ -218,11 +218,11 @@ const handleLogout = () => {
 
 // 列表操作
 const handleSizeChange = (val) => {
-  blogStore.fetchArticles(1, val)
+  blogStore.fetchArticlesHome(1, val)
 }
 
 const handleCurrentChange = (val) => {
-  blogStore.fetchArticles(val, blogStore.pageSize)
+  blogStore.fetchArticlesHome(val, blogStore.pageSize)
 }
 
 const handleDelete = (id) => {
@@ -276,9 +276,9 @@ const downloadAttachment = async (attachment) => {
 
 // 初始化加载数据
 onMounted(() => {
-  if (blogStore.articles.length === 0) {
-    blogStore.fetchArticles(1, 10)
-  }
+  //if (blogStore.articles.length === 0) {
+    blogStore.fetchArticlesHome(1, 10)
+  //}
 })
 </script>
 

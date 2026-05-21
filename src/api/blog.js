@@ -9,6 +9,14 @@ export function getArticles(params = {}) {
   })
 }
 
+export function getArticlesHome(params = {}) {
+  return request({
+    url: '/api/articlesPageHome',
+    method: 'get',
+    params // 自动将对象序列化为 URL 查询参数 ?page=1&pageSize=10
+  })
+}
+
 export function addArticle(data) {
 
    // 判断 data 是否是 FormData 实例

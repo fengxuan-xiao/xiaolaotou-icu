@@ -234,9 +234,9 @@ const downloadAttachment = async (attachment) => {
 }
 
 onMounted(() => {
-  if (blogStore.articles.length === 0) {
+  //if (blogStore.articles.length === 0) {
     blogStore.fetchArticles(1, 10)
-  }
+  //}
 })
 </script>
 
