@@ -119,24 +119,24 @@ export const useExcelBatchStore = defineStore('excelBatch', () => {
     try {
       // 更新查询类型
       queryParams.type = type
-      
+      debugger;
       const res = await getImportList({
         ...queryParams,
         status: type === 'ALL' ? '' : type // 假设后端接口用 status 字段筛选
       })
-
+debugger
       if (res.code === 200) {
         total.value = res.data.total
         // 根据返回的数据结构，可能需要前端过滤，或者后端直接返回对应类型的列表
         // 这里假设后端根据 status 参数返回了对应数据
         if (type === 'SUCCESS') {
-          successList.value = res.data.records
+          successList.value = res.data.list
         } else if (type === 'FAIL') {
-          failList.value = res.data.records
+          failList.value = res.data.list
         } else {
           // 如果是 ALL，可能需要分别赋值或合并，视具体业务而定
-          successList.value = res.data.records.filter(item => item.status === 'SUCCESS')
-          failList.value = res.data.records.filter(item => item.status === 'FAIL')
+          successList.value = res.data.list.filter(item => item.status === 'SUCCESS')
+          failList.value = res.data.list.filter(item => item.status === 'FAIL')
         }
       }
     } catch (error) {

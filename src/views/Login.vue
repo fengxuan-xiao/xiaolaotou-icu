@@ -106,7 +106,7 @@ const handleLogin = async () => {
       if (success) {
         // 登录成功后跳转，由组件控制路由逻辑
         // 【修改点】如果有 redirect 参数，则跳回原页面，否则默认跳去 /blog
-        const redirect = route.query.redirect || '/blog'
+        const redirect = route.query.redirect || '/home'
         router.push(redirect)
       }
     }

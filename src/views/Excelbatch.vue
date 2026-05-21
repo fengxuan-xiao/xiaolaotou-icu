@@ -55,7 +55,7 @@
           <!-- 搜索框 -->
           <el-input
             v-model="store.queryParams.keyword"
-            placeholder="请输入姓名/手机号搜索"
+            placeholder="请输入相关信息搜索"
             style="width: 200px"
             clearable
             @clear="store.resetQuery"
@@ -85,11 +85,11 @@
             stripe
             style="width: 100%"
           >
-            <el-table-column prop="id" label="ID" width="80" />
-            <el-table-column prop="name" label="姓名" width="120" />
-            <el-table-column prop="phone" label="手机号" width="150" />
-            <el-table-column prop="email" label="邮箱" />
-            <el-table-column prop="department" label="部门" width="120" />
+            <el-table-column prop="id" label="ID" width="200" />
+            <el-table-column prop="title" label="文章标题" width="200" />
+            <el-table-column prop="content" label="文章内容" width="150" show-overflow-tooltip />
+            <el-table-column prop="authorName" label="作者名称" width="150"/>
+            <el-table-column prop="tags" label="标签" width="120" />
             <el-table-column prop="importTime" label="导入时间" width="180" />
           </el-table>
         </el-tab-pane>
@@ -103,9 +103,11 @@
             stripe
             style="width: 100%"
           >
-            <el-table-column prop="rowIndex" label="行号" width="80" />
-            <el-table-column prop="name" label="姓名" width="120" />
-            <el-table-column prop="phone" label="手机号" width="150" />
+            <el-table-column prop="rowIndex" label="行号" width="200" />
+            <el-table-column prop="title" label="文章标题" width="200" />
+            <el-table-column prop="content" label="文章内容" width="150" show-overflow-tooltip />
+            <el-table-column prop="authorName" label="作者名称" width="150"/>
+            <el-table-column prop="tags" label="标签" width="120" />
             <el-table-column prop="failReason" label="失败原因" show-overflow-tooltip />
             <el-table-column prop="importTime" label="尝试时间" width="180" />
           </el-table>

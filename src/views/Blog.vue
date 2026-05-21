@@ -59,7 +59,7 @@
       <!-- 2. 文章列表区域 (保留) -->
       <el-card class="list-card" style="margin-top: 20px;">
         <template #header>
-          <span>已发布文章 ({{ blogStore.articles.length }})</span>
+          <span>已发布文章 ({{ blogStore.total }})</span>
         </template>
         <div v-if="blogStore.articles.length === 0" class="empty-tip">
           暂无文章

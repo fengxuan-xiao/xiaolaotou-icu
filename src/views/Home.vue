@@ -110,7 +110,7 @@
             </div>
             
             <!-- 关键点：只有登录用户才显示删除按钮 -->
-            <el-button 
+            <!-- <el-button 
               v-if="userStore.isLoggedIn" 
               type="danger" 
               link
@@ -118,7 +118,7 @@
               @click="handleDelete(article.id)"
             >
               删除
-            </el-button>
+            </el-button> -->
           </div>
         </div>
 
