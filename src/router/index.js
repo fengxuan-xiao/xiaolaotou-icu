@@ -42,7 +42,8 @@ const routes = [
   {
     path: '/report',
     name: 'Report',
-    component: Report,
+    //component: Report,
+    component: () => import('@/views/Report.vue'),
     meta: { title: '统计报表模块', requiresAuth: true }
   },
   {
