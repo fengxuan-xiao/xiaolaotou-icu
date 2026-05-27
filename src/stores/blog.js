@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getArticles,getArticlesHome, addArticle as apiAddArticle, deleteArticle as apiDeleteArticle } from '@/api/blog'
+import { startAuditProcess } from '@/api/auditProcess'
 import { ElMessage } from 'element-plus'
 
 export const useBlogStore = defineStore('blog', () => {
@@ -41,10 +42,10 @@ export const useBlogStore = defineStore('blog', () => {
 
   // 获取文章
   async function fetchArticlesHome(page = 1, size = 10) {
-    debugger;
+    //debugger;
     loading.value = true
     try {
-      debugger;
+      //debugger;
       // 调用 API 传入分页参数
       const res = await getArticlesHome({ page, pageSize: size })
 
@@ -55,7 +56,7 @@ export const useBlogStore = defineStore('blog', () => {
         pageSize.value = size
       }
     } catch (error) {
-      debugger;
+      //debugger;
       console.error('Fetch articles failed', error)
     } finally {
       loading.value = false
@@ -117,6 +118,9 @@ export const useBlogStore = defineStore('blog', () => {
 
       const res = await apiAddArticle(formData );
       console.log('API Response:', res);
+      debugger;
+      const articleId = res.data.id;
+      const res2 =await startAuditProcess(articleId);
       // 假设返回的是新创建的文章对象
       //articles.value.push(res.data)
       // 添加成功后，通常建议刷新第一页或者重新获取当前页

@@ -70,6 +70,18 @@
           <el-icon><Search /></el-icon>
           <span>ES模糊查询</span>
         </el-menu-item>
+
+        <!-- //permission 权限控制
+        //auditProcess 审核流程 -->
+        <el-menu-item index="/permission" :disabled="!userStore.isLoggedIn">
+          <el-icon><Operation /></el-icon>
+          <span>权限控制模块</span>
+        </el-menu-item>
+
+        <el-menu-item index="/auditProcess" :disabled="!userStore.isLoggedIn">
+          <el-icon><Operation /></el-icon>
+          <span>审核流程模块</span>
+        </el-menu-item>
       </el-menu>
     </el-drawer>
 

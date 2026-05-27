@@ -86,7 +86,7 @@ export const useExcelBatchStore = defineStore('excelBatch', () => {
 
     loading.value = true
     try {
-      debugger;
+      //debugger;
       
       const operator = 'admin' // 替换为实际的操作员用户名，例如 useUserStore().userInfo.name
       
@@ -119,12 +119,12 @@ export const useExcelBatchStore = defineStore('excelBatch', () => {
     try {
       // 更新查询类型
       queryParams.type = type
-      debugger;
+      //debugger;
       const res = await getImportList({
         ...queryParams,
         status: type === 'ALL' ? '' : type // 假设后端接口用 status 字段筛选
       })
-debugger
+//debugger
       if (res.code === 200) {
         total.value = res.data.total
         // 根据返回的数据结构，可能需要前端过滤，或者后端直接返回对应类型的列表

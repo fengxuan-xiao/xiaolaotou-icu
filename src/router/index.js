@@ -7,7 +7,9 @@ import Report from '@/views/Report.vue'
 import Rabbitmq from '@/views/Rabbitmq.vue'
 import Elasticsearch from '@/views/Elasticsearch.vue'
 import Excelbatch from '@/views/Excelbatch.vue'
-import { useUserStore } from '@/stores/user' 
+import { useUserStore } from '@/stores/user.js' 
+import Permission from '@/views/permission.vue'
+//import { useAuditProcessStore } from '@/views/auditProcess.vue'
 
 const routes = [
   {
@@ -20,6 +22,46 @@ const routes = [
     path: '/',
     redirect: '/home' // 根路径重定向到 home
   },
+
+//  {
+//     path: '/',
+//     component: () => import('@/layout/Layout.vue'),
+//     redirect: '/home',
+//     children: [
+//       {
+//         path: '/home',
+//         name: 'home',
+//         component: () => import('@/views/Home.vue'),
+//         meta: { title: '首页' }
+//       },
+//       {
+//         path: '/article',
+//         name: 'Article',
+//         component: () => import('@/views/Article.vue'),
+//         meta: { title: '文章管理', roles: ['author', 'admin'] } // 作者和管理员可见
+//       },
+//       {
+//         path: '/audit-first',
+//         name: 'AuditFirst',
+//         component: () => import('@/views/AuditProcess.vue'),
+//         meta: { title: '初审管理', roles: ['first_check', 'admin'] } // 初审员可见
+//       },
+//       {
+//         path: '/audit-recheck',
+//         name: 'AuditRecheck',
+//         component: () => import('@/views/AuditProcess.vue'),
+//         meta: { title: '复核管理', roles: ['recheck', 'admin'] } // 复核员可见
+//       },
+//       {
+//         path: '/permission',
+//         name: 'Permission',
+//         component: () => import('@/views/Permission.vue'),
+//         meta: { title: '权限管理', roles: ['admin'] } // 仅管理员
+//       }
+//     ]
+//   },
+
+
   {
     path: '/home',
     name: 'Home',
@@ -63,6 +105,20 @@ const routes = [
     name: 'Excelbatch',
     component: Excelbatch,
     meta: { title: '批量导入模块', requiresAuth: true }
+  },
+  //permission 权限控制
+  //auditProcess 审核流程
+  {
+    path: '/permission',
+    name: 'Permission',
+    component: () => import('@/views/Permission.vue'),//懒加载，访问路由时才加载
+    meta: { title: '权限控制模块', requiresAuth: true }
+  },
+  {
+    path: '/auditProcess',
+    name: 'AuditProcess',
+    component: () => import('@/views/AuditProcess.vue'),//懒加载，访问路由时才加载
+    meta: { title: '审核流程模块', requiresAuth: true }
   }
 ]
 
